@@ -17,6 +17,8 @@
  *  Copyright © 2014 Alex Malikov
  *
  */
+import groovy.json.JsonBuilder
+
 definition(
     name: "SmartTiles ${appVersion()}-${appStream()}",
     namespace: "625alex",
@@ -322,18 +324,18 @@ def nextPage() {
 }
 
 mappings {
-	if (params.access_token && params.access_token != state.accessToken) {
-		def oauthError = [GET: "oauthError"]
-        path("/ui") {action: oauthError}
-        path("/command") {action: oauthError}
-        path("/data") {action: oauthError}
-        path("/ping") {action: oauthError}
-        path("/link") {action: oauthError}
-        path("/list") {action: oauthError}
-        path("/history") {action: oauthError}
-        path("/position") {action: oauthError}
-        path("/css") {action: [GET: "oauthError", POST: "oauthError"]}
-	} else {
+//	if (params.access_token && params.access_token != state.accessToken) {
+//		def oauthError = [GET: "oauthError"]
+//        path("/ui") {action: oauthError}
+//        path("/command") {action: oauthError}
+//        path("/data") {action: oauthError}
+//        path("/ping") {action: oauthError}
+//        path("/link") {action: oauthError}
+//        path("/list") {action: oauthError}
+//        path("/history") {action: oauthError}
+//        path("/position") {action: oauthError}
+//        path("/css") {action: [GET: "oauthError", POST: "oauthError"]}
+//	} else {
         path("/ui") {action: [GET: "html"]}
         path("/command") {action: [GET: "command"]}
         path("/data") {action: [GET: "allDeviceData"]}
@@ -343,7 +345,7 @@ mappings {
 		path("/history") {action: [GET: "history"]}
 		path("/position") {action: [GET: "position"]}
 		path("/css") {action: [GET: "css", POST: "saveCSS"]}
-    }
+//    }
 }
 
 def oauthError() {[error: "OAuth token is invalid or access has been revoked"]}
@@ -537,7 +539,7 @@ def generateURL(path) {
 		}
 	}
 	
-	["https://graph.api.smartthings.com/api/smartapps/installations/${app.id}/$path", "?access_token=${state.accessToken}"]
+	["${getApiServerUrl()}/${hubUID}/apps/${app.id}/$path", "?access_token=${state.accessToken}"]
 }
 
 def head() {
@@ -562,7 +564,7 @@ window.location.hash = "";
 var stateTS = ${getStateTS()};
 var tileSize = ${getTSize()};
 var readOnlyMode = ${readOnlyMode ?: false};
-var icons = ${getTileIcons().encodeAsJSON()};
+var icons = ${new JsonBuilder(getTileIcons()).toString()};
 var appVersion = "${appVersion()}";
 var minTemp = ${getMinTemp()};
 var maxTemp = ${getMaxTemp()};
